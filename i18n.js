@@ -5,10 +5,13 @@ async function fetchTranslations() {
     const hostname = window.location.hostname;
     let translationUrl;
 
-    if (hostname.includes("skydeck.ai")) {
+    if (hostname.includes("skydeck.ai") || hostname.includes("skydeck.webflow.io")) {
       translationUrl =
         "https://skydeckai.github.io/i18n/translations_skydeck.json";
-    } else if (hostname.includes("rememberizer.ai")) {
+    } else if (
+      hostname.includes("rememberizer.ai") ||
+      hostname.includes("rememberizer.webflow.io")
+    ) {
       translationUrl =
         "https://skydeckai.github.io/i18n/translations_rememberizer.json";
     } else {
