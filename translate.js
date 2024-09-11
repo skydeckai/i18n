@@ -1,8 +1,7 @@
 let translations = {};
 
 function getScriptURLParameters() {
-  const scripts = document.getElementsByTagName("script");
-  const currentScript = scripts[scripts.length - 1];
+  const currentScript = document.currentScript;
   const scriptSrc = currentScript.src;
   const url = new URL(scriptSrc);
   return new URLSearchParams(url.search);
