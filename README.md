@@ -10,8 +10,9 @@ This directory is used to store translation files for the SkyDeck and Rememberiz
 ## File Structure
 
 - `translations_<project>.json`: Each project has its own cache file to store translations for different languages.
+- `i18n.js`: A JavaScript file responsible for fetching translations and dynamically translating pages based on user-selected language preferences. The script is fetched and integrated into the SkyDeck and Rememberizer websites hosted on Webflow.
 
-### Managing Cache Files
+## Managing Cache Files
 
 - Cache files are named as `translations_<project>.json`, where `<project>` is the name of the project (e.g., `skydeck`, `rememberizer`).
 - You can inspect these JSON files to view or edit translations manually if needed.
