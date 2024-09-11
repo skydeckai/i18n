@@ -1,30 +1,30 @@
 let translations = {};
 
+function getScriptURLParameters() {
+  const scripts = document.getElementsByTagName("script");
+  const currentScript = scripts[scripts.length - 1];
+  const scriptSrc = currentScript.src;
+  const url = new URL(scriptSrc);
+  return new URLSearchParams(url.search);
+}
+
+
 async function fetchTranslations() {
   try {
-    const hostname = window.location.hostname;
-    let translationUrl;
+    const scriptParams = getScriptURLParameters();
+    const translationUrl = scriptParams.get('translationUrl');
 
-    if (hostname.includes("skydeck.ai") || hostname.includes("skydeck.webflow.io")) {
-      translationUrl =
-        "https://skydeckai.github.io/i18n/translations_skydeck.json";
-    } else if (
-      hostname.includes("rememberizer.ai") ||
-      hostname.includes("rememberizer.webflow.io")
-    ) {
-      translationUrl =
-        "https://skydeckai.github.io/i18n/translations_rememberizer.json";
-    } else {
-      throw new Error("Unsupported domain");
+    if (!translationUrl) {
+      throw new Error('Translation URL not specified in script URL');
     }
 
     const response = await fetch(translationUrl);
     if (!response.ok) {
-      throw new Error("Network response was not ok");
+      throw new Error('Network response was not ok');
     }
     translations = await response.json();
   } catch (error) {
-    console.error("Error fetching translations:", error);
+    console.error('Error fetching translations:', error);
   }
 }
 

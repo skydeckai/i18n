@@ -1,18 +1,28 @@
-# Translation files for SkyDeck and Rememberizer
+# Translation Script
 
-This directory is used to store translation files for the SkyDeck and Rememberizer websites. These files help in managing and reusing translations, reducing the need for repeated API calls and improving the efficiency of the translation process.
+## Introduction
+This project provides a language translation feature for a website using JavaScript. It dynamically translates text nodes and attributes based on the specified language.
 
-## Purpose
+## Features
+- Fetches translations from a specified URL.
+- Updates text nodes with translations.
+- Changes language dynamically via a dropdown.
+- Updates URL and links to reflect the selected language.
 
-- **Translation Caching**: Store translations of the text extracted from the SkyDeck and Rememberizer websites to avoid redundant API requests and reduce translation costs.
-- **Performance Enhancement**: Speed up the translation process by utilizing pre-translated content.
+## Usage
+1. Add the `translate.js` script to your webpage.
+2. Specify the `translationUrl` in the script tag's URL parameters.
+3. Add a language dropdown with the id `languageDropdown`.
 
-## File Structure
-
-- `translations_<project>.json`: Each project has its own cache file to store translations for different languages.
-- `i18n.js`: A JavaScript file responsible for fetching translations and dynamically translating pages based on user-selected language preferences. The script is fetched and integrated into the SkyDeck and Rememberizer websites hosted on Webflow.
-
-## Managing Cache Files
-
-- Cache files are named as `translations_<project>.json`, where `<project>` is the name of the project (e.g., `skydeck`, `rememberizer`).
-- You can inspect these JSON files to view or edit translations manually if needed.
+Example:
+```html
+<script src="https://skydeckai.github.io/translate.js?translationUrl=path/to/translations.json"></script>
+<select id="languageDropdown">
+  <option value="en">English</option>
+  <option value="fr">French</option>
+  <option value="ja">Japanese</option>
+  <option value="ko">Korean</option>
+  <option value="es">Spanish</option>
+  <option value="it">Italian</option>
+</select>
+```
