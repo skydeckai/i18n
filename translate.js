@@ -123,6 +123,51 @@ function updateLinks(language) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const languageSelector = document.createElement("div");
+  languageSelector.className = "language-selector";
+
+  const dropdown = document.createElement("select");
+  dropdown.id = "languageDropdown";
+  dropdown.onchange = changeLanguage;
+
+  const languages = [
+    { value: "en", text: "English" },
+    { value: "fr", text: "Français" },
+    { value: "ja", text: "日本語" },
+    { value: "ko", text: "한국어" },
+    { value: "es", text: "Español" },
+    { value: "it", text: "Italiano" },
+  ];
+
+  languages.forEach((language) => {
+    const option = document.createElement("option");
+    option.value = language.value;
+    option.textContent = language.text;
+    dropdown.appendChild(option);
+  });
+
+  languageSelector.appendChild(dropdown);
+  document.body.appendChild(languageSelector);
+
+  const style = document.createElement("style");
+  style.textContent = `
+    .language-selector {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 10%;
+      padding: 10px;
+      text-align: center;
+      z-index: 1000;
+    }
+    .language-selector select {
+      padding: 5px;
+      font-size: 16px;
+    }
+  `;
+
+  document.head.appendChild(style);
+
   await fetchTranslations();
   const urlParams = new URLSearchParams(window.location.search);
   const language = isLanguageSupported(urlParams.get("lang"))
