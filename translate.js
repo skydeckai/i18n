@@ -1,29 +1,35 @@
 let translations = {};
 
 function getScriptURLParameters() {
-  const currentScript = document.currentScript;
-  const scriptSrc = currentScript.src;
+  const scriptElement = document.getElementById("translationScript");
+
+  if (!scriptElement) {
+    console.error("Script element not found");
+    return new URLSearchParams();
+  }
+
+  const scriptSrc = scriptElement.src;
   const url = new URL(scriptSrc);
+
   return new URLSearchParams(url.search);
 }
-
 
 async function fetchTranslations() {
   try {
     const scriptParams = getScriptURLParameters();
-    const translationUrl = scriptParams.get('translationUrl');
+    const translationUrl = scriptParams.get("translationUrl");
 
     if (!translationUrl) {
-      throw new Error('Translation URL not specified in script URL');
+      throw new Error("Translation URL not specified in script URL");
     }
 
     const response = await fetch(translationUrl);
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      throw new Error("Network response was not ok");
     }
     translations = await response.json();
   } catch (error) {
-    console.error('Error fetching translations:', error);
+    console.error("Error fetching translations:", error);
   }
 }
 
@@ -82,10 +88,7 @@ async function changeLanguage() {
 }
 
 async function setLanguage(language) {
-  console.log(language);
   const url = new URL(window.location);
-  const currentPath = url.pathname.replace(/^\/(en|fr|ja|ko|es|it)/, "");
-  url.pathname = currentPath;
   url.searchParams.set("lang", language);
   window.history.pushState({}, "", url.href);
   window.location.reload();
@@ -93,11 +96,8 @@ async function setLanguage(language) {
 
 function updateURL(language) {
   const url = new URL(window.location);
-  const currentPath = url.pathname.replace(/^\/(en|fr|ja|ko|es|it)/, "");
-  let newPath = language === "en" ? currentPath : `/${language}${currentPath}`;
-  url.pathname = newPath;
-  url.searchParams.delete("lang");
-  window.history.replaceState({}, "", url.pathname + url.search);
+  url.searchParams.set("lang", language);
+  window.history.replaceState({}, "", url.href);
 }
 
 function updateDropdown(language) {
@@ -106,14 +106,19 @@ function updateDropdown(language) {
 }
 
 function updateLinks(language) {
-  const links = document.querySelectorAll('a[href^="/"]');
+  const links = document.querySelectorAll('a[href^="/"], a[href^="?"]');
   links.forEach((link) => {
     let href = link.getAttribute("href");
-    const url = new URL(href, window.location.origin);
-    const currentPath = url.pathname.replace(/^\/(en|fr|ja|ko|es|it)/, "");
-    url.pathname =
-      language === "en" ? currentPath : `/${language}${currentPath}`;
-    link.setAttribute("href", url.pathname + url.search);
+    const isQueryOnly = href.startsWith("?");
+
+    const baseUrl = isQueryOnly ? window.location.pathname : "";
+    const url = new URL(href, window.location.origin + baseUrl);
+
+    url.searchParams.set("lang", language);
+
+    const newHref = isQueryOnly ? url.search : url.pathname + url.search;
+
+    link.setAttribute("href", newHref);
   });
 }
 
