@@ -10,19 +10,15 @@ This project provides a language translation feature for a website using JavaScr
 - Updates URL and links to reflect the selected language.
 
 ## Usage
-1. Add the `translate.js` script to your webpage.
-2. Specify the `translationUrl` in the script tag's URL parameters.
-3. Add a language dropdown with the id `languageDropdown`.
-
-Example:
+1. Add the following script to your webpage, make sure the script tag includes the id `translationScript`.
 ```html
-<script src="https://skydeckai.github.io/translate.js?translationUrl=path/to/translations.json"></script>
-<select id="languageDropdown">
-  <option value="en">English</option>
-  <option value="fr">French</option>
-  <option value="ja">Japanese</option>
-  <option value="ko">Korean</option>
-  <option value="es">Spanish</option>
-  <option value="it">Italian</option>
-</select>
+<script id="translationScript" src="https://skydeckai.github.io/i18n/translate.js?translationUrl=<your_translation_file_url>"></script>
 ```
+
+2. Specify the `translationUrl` in the script tag's URL parameters. For example:
+```html
+<script id="translationScript" src="https://skydeckai.github.io/i18n/translate.js?translationUrl=https://skydeckai.github.io/i18n/translations/skydeck.json"></script>
+```
+
+
+

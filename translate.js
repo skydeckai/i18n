@@ -78,7 +78,9 @@ async function translatePage(language) {
 }
 
 function isLanguageSupported(language) {
-  return supportedLanguages.includes(language);
+  return supportedLanguages.some((supportedLanguage) => {
+    return supportedLanguage.value === language;
+  });
 }
 
 async function changeLanguage() {
@@ -130,16 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   dropdown.id = "languageDropdown";
   dropdown.onchange = changeLanguage;
 
-  const languages = [
-    { value: "en", text: "English" },
-    { value: "fr", text: "Français" },
-    { value: "ja", text: "日本語" },
-    { value: "ko", text: "한국어" },
-    { value: "es", text: "Español" },
-    { value: "it", text: "Italiano" },
-  ];
-
-  languages.forEach((language) => {
+  supportedLanguages.forEach((language) => {
     const option = document.createElement("option");
     option.value = language.value;
     option.textContent = language.text;
@@ -190,18 +183,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 window.addEventListener("popstate", async (event) => {
-  await fetchTranslations();
   const urlParams = new URLSearchParams(window.location.search);
   const language = isLanguageSupported(urlParams.get("lang"))
     ? urlParams.get("lang")
     : "en";
-  updateDropdown(language);
-  if (language !== "en") {
-    await translatePage(language);
-  }
-  updateLinks(language);
-  updateURL(language);
+    
   window.location.reload();
 });
 
-const supportedLanguages = ["en", "fr", "ja", "ko", "es", "it"];
+const supportedLanguages = [
+  { value: "en", text: "English" },
+  { value: "fr", text: "Français" },
+  { value: "ja", text: "日本語" },
+  { value: "ko", text: "한국어" },
+  { value: "es", text: "Español" },
+  { value: "it", text: "Italiano" },
+];
