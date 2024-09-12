@@ -161,8 +161,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       z-index: 1000;
     }
     .language-selector select {
-      padding: 5px;
+      padding: 8px;
       font-size: 16px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      -webkit-appearance: none;
+      background-image: url(data:image/svg+xml,%3Csvg%20width%3D%2264px%22%20height%3D%2264px%22%20viewBox%3D%22-102.4%20-102.4%201228.80%201228.80%22%20class%3D%22icon%22%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22%23aaaaaa%22%20stroke%3D%22%23aaaaaa%22%20stroke-width%3D%2222.528%22%3E%3Cg%20id%3D%22SVGRepo_bgCarrier%22%20stroke-width%3D%220%22%3E%3C%2Fg%3E%3Cg%20id%3D%22SVGRepo_tracerCarrier%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3C%2Fg%3E%3Cg%20id%3D%22SVGRepo_iconCarrier%22%3E%3Cpath%20d%3D%22M903.232%20256l56.768%2050.432L512%20768%2064%20306.432%20120.768%20256%20512%20659.072z%22%20fill%3D%22%23aaaaaa%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E);
+      background-repeat: no-repeat;
+      background-position: right 7px center;
+      background-size: 12px;
+      width: 90px;
     }
   `;
 
