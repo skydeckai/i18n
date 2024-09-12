@@ -148,6 +148,7 @@ window.addEventListener("popstate", async (event) => {
   }
   updateLinks(language);
   updateURL(language);
+  window.location.reload();
 });
 
 const supportedLanguages = ["en", "fr", "ja", "ko", "es", "it"];
