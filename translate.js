@@ -1,7 +1,7 @@
 let translations = {};
 
 function getScriptURLParameters() {
-  const scriptElement = document.getElementById("translationScript");
+  const scriptElement = document.getElementById("i18nWebflowScript");
 
   if (!scriptElement) {
     console.error("Script element not found");
@@ -35,19 +35,36 @@ async function fetchTranslations() {
 
 async function hashText(text) {
   const encoder = new TextEncoder();
-  const data = encoder.encode(text);
+  const data = encoder.encode(text.trim());
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+function removeAriaHiddenAttributes(node) {
+  if (node.hasAttribute && node.hasAttribute("aria-hidden")) {
+    node.removeAttribute("aria-hidden");
+  }
+  node.childNodes.forEach((child) => removeAriaHiddenAttributes(child));
+}
+
 async function translateTextNodes(node, language) {
-  if (node.nodeType === Node.TEXT_NODE) {
-    const textContent = node.textContent;
-    if (textContent) {
-      const hash = await hashText(textContent);
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    removeAriaHiddenAttributes(node);
+
+    const hasTextNodeChild = Array.from(node.childNodes).some(
+      (child) => child.nodeType === Node.TEXT_NODE && child.textContent.trim()
+    );
+
+    if (hasTextNodeChild) {
+      const innerHTML = Array.from(node.childNodes)
+        .map((child) => child.outerHTML || child.textContent)
+        .join("")
+        .trim();
+      const hash = await hashText(innerHTML);
+      console.log(node, hash);
       if (translations[language] && translations[language][hash]) {
-        node.textContent = translations[language][hash];
+        node.innerHTML = translations[language][hash];
         return;
       }
     }
@@ -56,7 +73,7 @@ async function translateTextNodes(node, language) {
   if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute("value")) {
     const valueContent = node.getAttribute("value");
     if (valueContent) {
-      const hash = await hashText(valueContent);
+      const hash = await hashText(valueContent.trim());
       if (translations[language] && translations[language][hash]) {
         node.setAttribute("value", translations[language][hash]);
         return;
@@ -187,7 +204,7 @@ window.addEventListener("popstate", async (event) => {
   const language = isLanguageSupported(urlParams.get("lang"))
     ? urlParams.get("lang")
     : "en";
-    
+
   window.location.reload();
 });
 
