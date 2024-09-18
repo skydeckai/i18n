@@ -61,8 +61,8 @@ async function translateTextNodes(node, language) {
         .map((child) => child.outerHTML || child.textContent)
         .join("")
         .trim();
+        
       const hash = await hashText(innerHTML);
-      console.log(node, hash);
       if (translations[language] && translations[language][hash]) {
         node.innerHTML = translations[language][hash];
         return;
@@ -209,5 +209,20 @@ const supportedLanguages = [
   { value: "ja", text: "日本語" },
   { value: "ko", text: "한국어" },
   { value: "es", text: "Español" },
-  { value: "it", text: "Italiano" },
+  { value: "de", text: "Deutsch" },
+  { value: "zh-cn", text: "简体中文" },
+  { value: "zh-hk", text: "繁體中文" },
+  { value: "pt", text: "Português" },
+  { value: "ar", text: "العربية" },
 ];
+
+module.exports = {
+  getScriptURLParameters,
+  fetchTranslations,
+  hashText,
+  removeAriaHiddenAttributes,
+  translatePage,
+  isLanguageSupported,
+  translateTextNodes,
+  translations,
+};
