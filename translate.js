@@ -200,11 +200,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 window.addEventListener("popstate", async (event) => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const language = isLanguageSupported(urlParams.get("lang"))
-    ? urlParams.get("lang")
-    : "en";
-
   window.location.reload();
 });
 
