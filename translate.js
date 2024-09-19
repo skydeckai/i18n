@@ -94,6 +94,54 @@ async function translatePage(language) {
   }
 }
 
+async function translateMetaTags(language) {
+  if (!translations[language]) return;
+
+  const titleElement = document.querySelector("title");
+  if (titleElement) {
+    const titleHash = await hashText(titleElement.textContent.trim());
+    if (translations[language][titleHash]) {
+      titleElement.textContent = translations[language][titleHash];
+    }
+  }
+
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if (metaDescription) {
+    const descriptionHash = await hashText(
+      metaDescription.getAttribute("content").trim()
+    );
+    if (translations[language][descriptionHash]) {
+      metaDescription.setAttribute(
+        "content",
+        translations[language][descriptionHash]
+      );
+    }
+  }
+
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) {
+    const ogTitleHash = await hashText(ogTitle.getAttribute("content").trim());
+    if (translations[language][ogTitleHash]) {
+      ogTitle.setAttribute("content", translations[language][ogTitleHash]);
+    }
+  }
+
+  const ogDescription = document.querySelector(
+    'meta[property="og:description"]'
+  );
+  if (ogDescription) {
+    const ogDescriptionHash = await hashText(
+      ogDescription.getAttribute("content").trim()
+    );
+    if (translations[language][ogDescriptionHash]) {
+      ogDescription.setAttribute(
+        "content",
+        translations[language][ogDescriptionHash]
+      );
+    }
+  }
+}
+
 function isLanguageSupported(language) {
   return supportedLanguages.some((supportedLanguage) => {
     return supportedLanguage.value === language;
@@ -151,6 +199,30 @@ function updateLinks(language) {
     link.setAttribute("href", newHref);
   });
 }
+
+function addHreflangAndCanonicalTags(currentLanguage) {
+  const head = document.head;
+
+  document
+    .querySelectorAll('link[rel="alternate"], link[rel="canonical"]')
+    .forEach((el) => el.remove());
+
+  const baseUrl = window.location.origin;
+
+  supportedLanguages.forEach((language) => {
+    const hreflangLink = document.createElement("link");
+    hreflangLink.rel = "alternate";
+    hreflangLink.hreflang = language.value;
+    hreflangLink.href = `${baseUrl}${window.location.pathname}?lang=${language.value}`;
+    head.appendChild(hreflangLink);
+  });
+
+  const canonicalLink = document.createElement("link");
+  canonicalLink.rel = "canonical";
+  canonicalLink.href = `${baseUrl}${window.location.pathname}?lang=${currentLanguage}`;
+  head.appendChild(canonicalLink);
+}
+
 
 document.addEventListener("DOMContentLoaded", async () => {
   const languageSelector = document.createElement("div");
@@ -216,10 +288,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (language !== "en") {
     await translatePage(language);
+    await translateMetaTags(language);
   }
 
   updateLinks(language);
   updateURL(language);
+  addHreflangAndCanonicalTags(language);
 });
 
 window.addEventListener("popstate", async (event) => {
