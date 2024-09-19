@@ -119,6 +119,17 @@ function updateURL(language) {
   window.history.replaceState({}, "", url.href);
 }
 
+function updateTextDirection(language) {
+  const body = document.body;
+  if (language === "ar") {
+    body.style.direction = "rtl";
+    body.style.textAlign = "right";
+  } else {
+    body.style.direction = "ltr";
+    body.style.textAlign = "left";
+  }
+}
+
 function updateDropdown(language) {
   const dropdown = document.getElementById("languageDropdown");
   dropdown.value = language;
@@ -187,14 +198,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.head.appendChild(style);
 
   await fetchTranslations();
+
   const urlParams = new URLSearchParams(window.location.search);
   const language = isLanguageSupported(urlParams.get("lang"))
     ? urlParams.get("lang")
     : "en";
+
   updateDropdown(language);
+
+  updateTextDirection(language);
+
+  const slider = document.querySelector(".w-slider");
+
+  if (slider) {
+    slider.style.direction = "ltr";
+  }
+
   if (language !== "en") {
     await translatePage(language);
   }
+
   updateLinks(language);
   updateURL(language);
 });
