@@ -191,7 +191,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       background-repeat: no-repeat;
       background-position: right 7px center;
       background-size: 12px;
-      width: 90px;
+      width: 100px;
     }
   `;
 
