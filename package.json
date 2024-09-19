@@ -1,0 +1,17 @@
+{
+  "name": "cache_i18n",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "This script enables translation of Webflow pages using translation files hosted in a specified URL. It updates the page content dynamically based on the selected language.",
+  "main": "translate.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jsdom": "^25.0.0"
+  }
+}
