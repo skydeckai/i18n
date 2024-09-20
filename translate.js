@@ -200,11 +200,11 @@ function updateLinks(language) {
   });
 }
 
-function addHreflangAndCanonicalTags(currentLanguage) {
+function addHreflangTags() {
   const head = document.head;
 
   document
-    .querySelectorAll('link[rel="alternate"], link[rel="canonical"]')
+    .querySelectorAll('link[rel="alternate"]')
     .forEach((el) => el.remove());
 
   const baseUrl = window.location.origin;
@@ -216,11 +216,6 @@ function addHreflangAndCanonicalTags(currentLanguage) {
     hreflangLink.href = `${baseUrl}${window.location.pathname}?lang=${language.value}`;
     head.appendChild(hreflangLink);
   });
-
-  const canonicalLink = document.createElement("link");
-  canonicalLink.rel = "canonical";
-  canonicalLink.href = `${baseUrl}${window.location.pathname}?lang=${currentLanguage}`;
-  head.appendChild(canonicalLink);
 }
 
 
@@ -293,7 +288,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   updateLinks(language);
   updateURL(language);
-  addHreflangAndCanonicalTags(language);
+  addHreflangTags();
 });
 
 window.addEventListener("popstate", async (event) => {
