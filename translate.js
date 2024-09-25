@@ -148,27 +148,43 @@ function isLanguageSupported(language) {
   });
 }
 
-async function changeLanguage() {
+function changeLanguage() {
   const dropdown = document.getElementById("languageDropdown");
   const selectedLanguage = dropdown.value;
-  await setLanguage(selectedLanguage);
+  setLanguage(selectedLanguage);
 }
 
-async function setLanguage(language) {
-  const url = new URL(window.location);
-  url.searchParams.set("lang", language);
-  window.history.pushState({}, "", url.href);
-  window.location.reload();
-}
+function setLanguage(language) {
+  const scriptParams = getScriptURLParameters();
+  const usePathParam = scriptParams.get("usePathParam") === "true";
 
-function updateURL(language) {
   const url = new URL(window.location);
-  if (language === "en") {
+
+  if (usePathParam) {
+    const pathParts = url.pathname.split("/").filter(Boolean);
+    if (language === "en") {
+      if (isLanguageSupported(pathParts[0])) {
+        pathParts.shift();
+      }
+    } else {
+      if (isLanguageSupported(pathParts[0])) {
+        pathParts[0] = language;
+      } else {
+        pathParts.unshift(language);
+      }
+    }
+    url.pathname = "/" + pathParts.join("/");
     url.searchParams.delete("lang");
   } else {
-    url.searchParams.set("lang", language);
+    if (language === "en") {
+      url.searchParams.delete("lang");
+    } else {
+      url.searchParams.set("lang", language);
+    }
   }
-  window.history.replaceState({}, "", url.href);
+
+  window.history.pushState({}, "", url.href);
+  window.location.reload();
 }
 
 function updateTextDirection(language) {
@@ -187,7 +203,40 @@ function updateDropdown(language) {
   dropdown.value = language;
 }
 
+function updateURL(language) {
+  const scriptParams = getScriptURLParameters();
+  const usePathParam = scriptParams.get("usePathParam") === "true";
+
+  const url = new URL(window.location);
+
+  if (usePathParam) {
+    const pathParts = url.pathname.split("/").filter(Boolean);
+    if (language === "en") {
+      pathParts.shift();
+    } else {
+      if (isLanguageSupported(pathParts[0])) {
+        pathParts[0] = language;
+      } else {
+        pathParts.unshift(language);
+      }
+    }
+    url.pathname = "/" + pathParts.join("/");
+    url.searchParams.delete("lang");
+  } else {
+    if (language === "en") {
+      url.searchParams.delete("lang");
+    } else {
+      url.searchParams.set("lang", language);
+    }
+  }
+
+  window.history.replaceState({}, "", url.href);
+}
+
 function updateLinks(language) {
+  const scriptParams = getScriptURLParameters();
+  const usePathParam = scriptParams.get("usePathParam") === "true";
+
   const links = document.querySelectorAll('a[href^="/"], a[href^="?"]');
   links.forEach((link) => {
     let href = link.getAttribute("href");
@@ -196,15 +245,34 @@ function updateLinks(language) {
     const baseUrl = isQueryOnly ? window.location.pathname : "";
     const url = new URL(href, window.location.origin + baseUrl);
 
-    url.searchParams.set("lang", language);
+    if (usePathParam) {
+      const pathParts = url.pathname.split("/").filter(Boolean);
+      if (language === "en") {
+        if (isLanguageSupported(pathParts[0])) {
+          pathParts.shift();
+        }
+      } else {
+        if (isLanguageSupported(pathParts[0])) {
+          pathParts[0] = language;
+        } else {
+          pathParts.unshift(language);
+        }
+      }
+      url.pathname = "/" + pathParts.join("/");
+      url.searchParams.delete("lang");
+    } else {
+      url.searchParams.set("lang", language);
+    }
 
     const newHref = isQueryOnly ? url.search : url.pathname + url.search;
-
     link.setAttribute("href", newHref);
   });
 }
 
 function addHreflangAndCanonicalTags(currentLanguage) {
+  const scriptParams = getScriptURLParameters();
+  const usePathParam = scriptParams.get("usePathParam") === "true";
+
   const head = document.head;
 
   document
@@ -212,15 +280,30 @@ function addHreflangAndCanonicalTags(currentLanguage) {
     .forEach((el) => el.remove());
 
   const baseUrl = window.location.origin;
+  const currentPath = window.location.pathname;
 
   supportedLanguages.forEach((language) => {
     const hreflangLink = document.createElement("link");
     hreflangLink.rel = "alternate";
     hreflangLink.hreflang = language.value;
-    if (language.value === "en") {
-      hreflangLink.href = `${baseUrl}${window.location.pathname}`;
+    if (usePathParam) {
+      if (language.value === "en") {
+        hreflangLink.href = `${baseUrl}${currentPath}`;
+      } else {
+        const pathParts = currentPath.split("/").filter(Boolean);
+        if (isLanguageSupported(pathParts[0])) {
+          pathParts[0] = language.value;
+        } else {
+          pathParts.unshift(language.value);
+        }
+        hreflangLink.href = `${baseUrl}/${pathParts.join("/")}`;
+      }
     } else {
-      hreflangLink.href = `${baseUrl}${window.location.pathname}?lang=${language.value}`;
+      if (language.value === "en") {
+        hreflangLink.href = `${baseUrl}${currentPath}`;
+      } else {
+        hreflangLink.href = `${baseUrl}${currentPath}?lang=${language.value}`;
+      }
     }
     head.appendChild(hreflangLink);
   });
@@ -228,15 +311,32 @@ function addHreflangAndCanonicalTags(currentLanguage) {
   const defaultHreflangLink = document.createElement("link");
   defaultHreflangLink.rel = "alternate";
   defaultHreflangLink.hreflang = "x-default";
-  defaultHreflangLink.href = `${baseUrl}${window.location.pathname}`;
+  defaultHreflangLink.href = `${baseUrl}${currentPath}`;
   head.appendChild(defaultHreflangLink);
 
   const canonicalLink = document.createElement("link");
   canonicalLink.rel = "canonical";
-  canonicalLink.href =
-    currentLanguage !== "en"
-      ? `${baseUrl}${window.location.pathname}?lang=${currentLanguage}`
-      : `${baseUrl}${window.location.pathname}`;
+  if (usePathParam) {
+    const pathParts = currentPath.split("/").filter(Boolean);
+    if (currentLanguage !== "en") {
+      if (isLanguageSupported(pathParts[0])) {
+        pathParts[0] = currentLanguage;
+      } else {
+        pathParts.unshift(currentLanguage);
+      }
+      canonicalLink.href = `${baseUrl}/${pathParts.join("/")}`;
+    } else {
+      if (isLanguageSupported(pathParts[0])) {
+        pathParts.shift();
+      }
+      canonicalLink.href = `${baseUrl}/${pathParts.join("/")}`;
+    }
+  } else {
+    canonicalLink.href =
+      currentLanguage !== "en"
+        ? `${baseUrl}${currentPath}?lang=${currentLanguage}`
+        : `${baseUrl}${currentPath}`;
+  }
   head.appendChild(canonicalLink);
 }
 
