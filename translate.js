@@ -49,6 +49,8 @@ function removeAriaHiddenAttributes(node) {
 }
 
 async function translateTextNodes(node, language) {
+  if (node.parentNode && node.parentNode.id === "languageDropdown") return;
+
   if (node.nodeType === Node.ELEMENT_NODE) {
     removeAriaHiddenAttributes(node);
 
@@ -61,7 +63,7 @@ async function translateTextNodes(node, language) {
         .map((child) => child.outerHTML || child.textContent)
         .join("")
         .trim();
-        
+
       const hash = await hashText(innerHTML);
       if (translations[language] && translations[language][hash]) {
         node.innerHTML = translations[language][hash];
@@ -80,8 +82,6 @@ async function translateTextNodes(node, language) {
       }
     }
   }
-
-  node.childNodes.forEach((child) => translateTextNodes(child, language));
 }
 
 async function translatePage(language) {
@@ -163,7 +163,11 @@ async function setLanguage(language) {
 
 function updateURL(language) {
   const url = new URL(window.location);
-  url.searchParams.set("lang", language);
+  if (language === "en") {
+    url.searchParams.delete("lang");
+  } else {
+    url.searchParams.set("lang", language);
+  }
   window.history.replaceState({}, "", url.href);
 }
 
@@ -200,11 +204,11 @@ function updateLinks(language) {
   });
 }
 
-function addHreflangTags() {
+function addHreflangAndCanonicalTags(currentLanguage) {
   const head = document.head;
 
   document
-    .querySelectorAll('link[rel="alternate"]')
+    .querySelectorAll('link[rel="alternate"], link[rel="canonical"]')
     .forEach((el) => el.remove());
 
   const baseUrl = window.location.origin;
@@ -213,11 +217,28 @@ function addHreflangTags() {
     const hreflangLink = document.createElement("link");
     hreflangLink.rel = "alternate";
     hreflangLink.hreflang = language.value;
-    hreflangLink.href = `${baseUrl}${window.location.pathname}?lang=${language.value}`;
+    if (language.value === "en") {
+      hreflangLink.href = `${baseUrl}${window.location.pathname}`;
+    } else {
+      hreflangLink.href = `${baseUrl}${window.location.pathname}?lang=${language.value}`;
+    }
     head.appendChild(hreflangLink);
   });
-}
 
+  const defaultHreflangLink = document.createElement("link");
+  defaultHreflangLink.rel = "alternate";
+  defaultHreflangLink.hreflang = "x-default";
+  defaultHreflangLink.href = `${baseUrl}${window.location.pathname}`;
+  head.appendChild(defaultHreflangLink);
+
+  const canonicalLink = document.createElement("link");
+  canonicalLink.rel = "canonical";
+  canonicalLink.href =
+    currentLanguage !== "en"
+      ? `${baseUrl}${window.location.pathname}?lang=${currentLanguage}`
+      : `${baseUrl}${window.location.pathname}`;
+  head.appendChild(canonicalLink);
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   const languageSelector = document.createElement("div");
@@ -288,7 +309,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   updateLinks(language);
   updateURL(language);
-  addHreflangTags();
+  addHreflangAndCanonicalTags(language);
 });
 
 window.addEventListener("popstate", async (event) => {
