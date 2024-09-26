@@ -13,5 +13,8 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "jsdom": "^25.0.0"
+  },
+  "dependencies": {
+    "uglify-js": "^3.19.3"
   }
 }
