@@ -13,26 +13,6 @@ function getScriptURLParameters() {
 
   return new URLSearchParams(url.search);
 }
-
-async function fetchTranslations() {
-  try {
-    const scriptParams = getScriptURLParameters();
-    const translationUrl = scriptParams.get("translationUrl");
-
-    if (!translationUrl) {
-      throw new Error("Translation URL not specified in script URL");
-    }
-
-    const response = await fetch(translationUrl);
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    translations = await response.json();
-  } catch (error) {
-    console.error("Error fetching translations:", error);
-  }
-}
-
 async function hashText(text) {
   const encoder = new TextEncoder();
   const data = encoder.encode(text.trim());
@@ -55,7 +35,7 @@ function removeAriaHiddenAttributes(node) {
 
 async function translateNode(node, language, textHashCache) {
   if (node.parentNode && node.parentNode.id === "languageDropdown") return;
-  
+
   if (node.nodeType === Node.ELEMENT_NODE) {
     if (node.nodeName === "SCRIPT" || node.nodeName === "STYLE") return;
 
@@ -72,6 +52,7 @@ async function translateNode(node, language, textHashCache) {
         const translatedValue = translations[language]?.[hash];
         if (translatedValue) {
           node.setAttribute("value", translatedValue);
+          node.setAttribute("data-original-value", valueContent);
         }
       }
     }
@@ -94,6 +75,7 @@ async function translateNode(node, language, textHashCache) {
       }
       const translatedHTML = translations[language]?.[hash];
       if (translatedHTML) {
+        node.setAttribute("data-original-content", innerHTML);
         node.innerHTML = translatedHTML;
         return;
       }
@@ -109,6 +91,8 @@ async function translatePage(language) {
   if (language === "en") return;
   const textHashCache = new Map();
   await translateNode(document.body, language, textHashCache);
+
+  document.documentElement.lang = language;
 }
 
 async function translateMetaTags(language) {
@@ -403,13 +387,17 @@ function createLanguageSelector() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await fetchTranslations();
-
   const urlParams = new URLSearchParams(window.location.search);
 
   const language = isLanguageSupported(urlParams.get("lang"))
     ? urlParams.get("lang")
     : "en";
+
+  addHreflangAndCanonicalTags(language);
+
+  if (language !== "en") {
+    await Promise.all([translatePage(language), translateMetaTags(language)]);
+  }
 
   createLanguageSelector();
 
@@ -423,13 +411,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     slider.style.direction = "ltr";
   }
 
-  if (language !== "en") {
-    await Promise.all([translatePage(language), translateMetaTags(language)]);
-  }
-
   updateLinks(language);
   updateURL(language);
-  addHreflangAndCanonicalTags(language);
 });
 
 window.addEventListener("popstate", () => {
@@ -452,7 +435,6 @@ const supportedLanguages = [
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     getScriptURLParameters,
-    fetchTranslations,
     hashText,
     removeAriaHiddenAttributes,
     translatePage,
